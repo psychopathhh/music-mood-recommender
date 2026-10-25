@@ -1,0 +1,12 @@
+__pycache__/
+.venv/
+venv/
+.pytest_cache/
+*.pyc
+artifacts/*.joblib
+artifacts/*.csv
+artifacts/*.json
+
+dataset.csv
+
+.vercel

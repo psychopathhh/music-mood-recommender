@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Music Mood Recommender</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark">♪</div>
+        <div>
+          <p class="eyebrow">Финальный ML-проект</p>
+          <h1>Music Mood Recommender</h1>
+        </div>
+      </div>
+      <div class="model-badge">
+        <span>Точность CV</span>
+        <strong id="cvAccuracy">...</strong>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <div class="hero-pill">Музыкальные ML-рекомендации</div>
+          <h2>Музыка под настроение</h2>
+          <p>Модель предсказывает настроение по косвенным признакам, а рекомендации собирают музыку по audio-вектору.</p>
+          <div class="stats" id="stats"></div>
+        </div>
+        <div class="mood-map" aria-label="Mood map">
+          <div class="map-title">
+            <span>Карта настроений</span>
+            <strong>Energy / Valence</strong>
+          </div>
+          <div class="axis axis-x">позитивность</div>
+          <div class="axis axis-y">энергия</div>
+          <button class="mood-dot happy" data-mood="happy">Весёлое</button>
+          <button class="mood-dot intense" data-mood="intense">Интенсивное</button>
+          <button class="mood-dot calm" data-mood="calm">Спокойное</button>
+          <button class="mood-dot sad" data-mood="sad">Грустное</button>
+          <button class="mood-dot neutral" data-mood="neutral">Нейтральное</button>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="Sections">
+        <button class="tab active" data-tab="mood">Настроение</button>
+        <button class="tab" data-tab="tracks">Похожие треки</button>
+        <button class="tab" data-tab="artists">Похожие артисты</button>
+        <button class="tab" data-tab="playlist">Плейлист</button>
+        <button class="tab" data-tab="eda">EDA</button>
+      </nav>
+
+      <section class="workspace">
+        <aside class="controls">
+          <div class="panel tab-panel active" id="panel-mood">
+            <p class="panel-kicker">Подбор по настроению</p>
+            <h3>Рекомендации по настроению</h3>
+            <label>Настроение</label>
+            <select id="moodSelect">
+              <option value="happy">Весёлое</option>
+              <option value="sad">Грустное</option>
+              <option value="calm">Спокойное</option>
+              <option value="energetic">Энергичное</option>
+              <option value="dance">Танцевальное</option>
+              <option value="chill">Чилл</option>
+              <option value="intense">Интенсивное</option>
+              <option value="neutral">Нейтральное</option>
+            </select>
+            <label>Жанр</label>
+            <select id="moodGenre"></select>
+            <div class="two-cols">
+              <div>
+                <label>Энергия</label>
+                <select id="moodEnergy">
+                  <option value="any">Любая</option>
+                  <option value="high">Высокая</option>
+                  <option value="medium">Средняя</option>
+                  <option value="low">Низкая</option>
+                </select>
+              </div>
+              <div>
+                <label>Танцевальность</label>
+                <select id="moodDance">
+                  <option value="any">Любая</option>
+                  <option value="high">Высокая</option>
+                  <option value="medium">Средняя</option>
+                  <option value="low">Низкая</option>
+                </select>
+              </div>
+            </div>
+            <button class="primary" id="moodButton">Подобрать</button>
+          </div>
+
+          <div class="panel tab-panel" id="panel-tracks">
+            <p class="panel-kicker">Поиск похожего</p>
+            <h3>Похожие треки</h3>
+            <label>Песня или артист</label>
+            <input id="trackQuery" list="trackHints" placeholder="The Weeknd, Blinding Lights">
+            <datalist id="trackHints"></datalist>
+            <button class="primary" id="trackButton">Найти похожие</button>
+            <button class="ghost" id="predictButton">Определить настроение</button>
+          </div>
+
+          <div class="panel tab-panel" id="panel-artists">
+            <p class="panel-kicker">Профили артистов</p>
+            <h3>Похожие артисты</h3>
+            <label>Артист</label>
+            <input id="artistQuery" list="artistHints" placeholder="Dua Lipa">
+            <datalist id="artistHints"></datalist>
+            <button class="primary" id="artistButton">Найти артистов</button>
+          </div>
+
+          <div class="panel tab-panel" id="panel-playlist">
+            <p class="panel-kicker">Генератор подборок</p>
+            <h3>Генератор плейлистов</h3>
+            <label>Режим</label>
+            <select id="playlistMode">
+              <option value="workout">Тренировка</option>
+              <option value="study">Учёба</option>
+              <option value="party">Вечеринка</option>
+              <option value="sad_evening">Грустный вечер</option>
+              <option value="chill">Чилл</option>
+              <option value="road_trip">Дорога</option>
+            </select>
+            <label>Жанр</label>
+            <select id="playlistGenre"></select>
+            <div class="two-cols">
+              <div>
+                <label>Энергия</label>
+                <select id="playlistEnergy">
+                  <option value="any">Любая</option>
+                  <option value="high">Высокая</option>
+                  <option value="medium">Средняя</option>
+                  <option value="low">Низкая</option>
+                </select>
+              </div>
+              <div>
+                <label>Танцевальность</label>
+                <select id="playlistDance">
+                  <option value="any">Любая</option>
+                  <option value="high">Высокая</option>
+                  <option value="medium">Средняя</option>
+                  <option value="low">Низкая</option>
+                </select>
+              </div>
+            </div>
+            <label>Количество треков</label>
+            <input id="playlistLimit" type="number" min="5" max="50" value="20">
+            <button class="primary" id="playlistButton">Сгенерировать</button>
+          </div>
+
+          <div class="panel tab-panel" id="panel-eda">
+            <p class="panel-kicker">Анализ датасета</p>
+            <h3>EDA и модель</h3>
+            <div id="edaSummary" class="eda-summary"></div>
+            <div class="eda-mini-grid">
+              <div class="eda-card">
+                <div class="eda-card-title">Распределение настроений</div>
+                <div id="moodChart" class="mini-chart"></div>
+              </div>
+              <div class="eda-card">
+                <div class="eda-card-title">Топ жанров</div>
+                <div id="genreChart" class="mini-chart"></div>
+              </div>
+              <div class="eda-card">
+                <div class="eda-card-title">Средние признаки</div>
+                <div id="featureChart" class="mini-chart"></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="results">
+          <div class="result-head">
+            <div>
+              <p class="eyebrow" id="resultLabel">Рекомендации</p>
+              <h2 id="resultTitle">Популярные треки</h2>
+            </div>
+            <span id="resultCount">0 items</span>
+          </div>
+          <div id="sourceBox" class="source-box hidden"></div>
+          <div id="results" class="track-grid"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
